@@ -31,8 +31,10 @@ jobs:
       - id: prepare_tags
         run: |
           TAGS="${{ env.IMAGE_NAME }}:latest"
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${{ github.ref }}"
+            TAG_NAME="${TAG_NAME#refs/tags/}"
+            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${TAG_NAME}"
           fi
           if [[ ! -z "${{ github.event.inputs.version_tag }}" ]]; then
             TAGS="${TAGS},${{ env.IMAGE_NAME }}:${{ github.event.inputs.version_tag }}"
