@@ -1,0 +1,25 @@
+services:
+  megacmd-gui:
+    container_name: megacmd-gui
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - root-volume:/root
+    working_dir: /root
+    user: root
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    ports:
+      - "58080:8080"
+    command: sh
+    stdin_open: true
+    tty: true
+
+volumes:
+  root-volume:

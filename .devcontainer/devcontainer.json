@@ -1,0 +1,40 @@
+{
+  "name": "MEGAcmd GUI",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.pythonPath": "/venv/bin/python"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+  // For propagation add:
+  // "source=/mnt/external_mnt,target=/mnt/external_mnt,type=bind,bind-propagation=rshared" 
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "source=root-volume,target=/root,type=volume"
+  ],
+  "overrideCommand": true,
+  "postCreateCommand": "bash",
+  "runArgs": [
+    "--name",
+    "megacmd-gui-dev",
+    "--cap-add=SYS_ADMIN",
+    "--device=/dev/fuse",
+    "--security-opt",
+    "apparmor:unconfined"
+  ],
+  "forwardPorts": [
+    8080
+  ],
+  "remoteUser": "root"
+}
