@@ -75,8 +75,8 @@ Getting started with development is streamlined using VSCode Dev Containers. Fol
   ```
 - Initiating a GitHub build by creating and pushing a tag to the repository:
   ```bash
-  git tag -a v0.1.1 -m "Release v0.1.1"
-  git push origin v0.1.1
+  git tag -a v0.1.2 -m "Release v0.1.2"
+  git push origin v0.1.2
   ```
 
 
