@@ -1,4 +1,4 @@
-name: Build and Push Multi-Arch Docker Image
+name: Build and Push MegaCMD GUI Docker Image
 
 on:
   push:
@@ -45,5 +45,3 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           tags: ${{ steps.prepare_tags.outputs.DOCKER_TAGS }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
