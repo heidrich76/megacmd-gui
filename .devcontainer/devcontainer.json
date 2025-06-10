@@ -17,8 +17,6 @@
       ]
     }
   },
-  // For propagation add:
-  // "source=/mnt/external_mnt,target=/mnt/external_mnt,type=bind,bind-propagation=rshared" 
   "mounts": [
     "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "source=root-volume,target=/root,type=volume"
