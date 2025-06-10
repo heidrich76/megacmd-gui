@@ -28,27 +28,21 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64, linux/arm64,
-          push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
       - id: prepare_tags
         run: |
-          TAGS="${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest"
+          TAGS="${{ env.IMAGE_NAME }}:latest"
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            TAGS="${TAGS},${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}"
+            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${{ github.sha }}"
           fi
           if [[ ! -z "${{ github.event.inputs.version_tag }}" ]]; then
-            TAGS="${TAGS},${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.event.inputs.version_tag }}"
+            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${{ github.event.inputs.version_tag }}"
           fi
           echo "DOCKER_TAGS=${TAGS}" >> "$GITHUB_OUTPUT"
         shell: bash
       - uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: ${{ steps.prepare_tags.outputs.DOCKER_TAGS }}
           cache-from: type=gha
