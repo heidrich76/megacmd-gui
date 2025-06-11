@@ -60,9 +60,9 @@ function connect() {
   });
 
   const protocol = (location.protocol === 'https:') ? 'wss' : 'ws';
-  const socket = new WebSocket(
-    `${protocol}://${location.host}${location.pathname}terminal`
-  );
+  const ws_url = `${protocol}://${location.host}/terminal`
+  console.log("Access to web socket:", ws_url)
+  socket = new WebSocket(ws_url);
   socket.binaryType = 'arraybuffer';
 
   socket.onopen = () => {

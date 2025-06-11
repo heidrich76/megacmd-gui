@@ -22,7 +22,7 @@ class Layout:
         current_path = context.client.request.url.path
 
         def menu_button(text, link):
-            active = current_path.startswith(link)
+            active = current_path.endswith(link)
             return (
                 ui.button(text, on_click=lambda: ui.navigate.to(link))
                 .props("flat")

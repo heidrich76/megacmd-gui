@@ -1,5 +1,6 @@
 from nicegui import ui, app
 from fastapi import WebSocket
+from pathlib import Path
 import asyncio
 import os
 import pty
@@ -10,6 +11,9 @@ import termios
 import struct
 import json
 from mc_layout import Layout, create_warning_label
+
+js_path = Path(__file__).parent / "static" / "terminal.js"
+js_code = js_path.read_text(encoding="utf8")
 
 
 @ui.page("/terminal")
@@ -25,12 +29,13 @@ def terminal_page():
         create_warning_label("Be carefull!")
 
     root_path = app.storage.general.get("root_path", "")
+    rp_js_code = js_code.replace("/terminal", f"{root_path}/terminal")
     ui.add_head_html(
         f"""
         <script src="{root_path}/static/xterm.js"></script>
         <link rel="stylesheet" href="{root_path}/static/xterm.css" />
         <script src="{root_path}/static/addon-fit.js"></script>
-        <script src="{root_path}/static/terminal.js"></script>
+        <script>{rp_js_code}</script>
         """
     )
 

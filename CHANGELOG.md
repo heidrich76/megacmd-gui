@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4
+
+- Corrected `root_path` usage with terminal's web socket
+- Corrected identification of active menu item
+
 ## 0.1.3
 
 - Corrected `root_path` usage with terminal
@@ -12,4 +17,8 @@
 
 ## 0.1.1
 
-- Initial testing release with most functionality
+- Added most functionality
+
+## 0.1.0
+
+- Initial testing release
