@@ -1,7 +1,5 @@
 from nicegui import app, context, ui
 import asyncio
-import re
-import subprocess
 from mc_subprocess import version, whoami, login, logout
 
 
@@ -33,6 +31,7 @@ class Layout:
 
         with ui.left_drawer(fixed=False).props("bordered") as drawer:
 
+            menu_button("Home", "/")
             menu_button("Synchronization", "/sync")
             menu_button("WebDAV", "/webdav")
             menu_button("Backup", "/backup")
@@ -57,6 +56,9 @@ class Layout:
             "items-center justify-between"
         ):
             self.version_label = ui.label("").props("dense")
+
+            if app.storage.general.get("dark", "NA") == "NA":
+                app.storage.general["dark"] = None
 
             dark = ui.dark_mode()
             dark.bind_value(app.storage.general, "dark")

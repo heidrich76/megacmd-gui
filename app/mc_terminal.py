@@ -24,12 +24,13 @@ def terminal_page():
         )
         create_warning_label("Be carefull!")
 
+    root_path = app.storage.general.get("root_path", "")
     ui.add_head_html(
-        """
-        <script src="/static/xterm.js"></script>
-        <link rel="stylesheet" href="/static/xterm.css" />
-        <script src="/static/addon-fit.js"></script>
-        <script src="/static/terminal.js"></script>
+        f"""
+        <script src="{root_path}/static/xterm.js"></script>
+        <link rel="stylesheet" href="{root_path}/static/xterm.css" />
+        <script src="{root_path}/static/addon-fit.js"></script>
+        <script src="{root_path}/static/terminal.js"></script>
         """
     )
 

@@ -59,7 +59,10 @@ function connect() {
     observer.observe(el);
   });
 
-  socket = new WebSocket(`ws://${location.host}/terminal`);
+  const protocol = (location.protocol === 'https:') ? 'wss' : 'ws';
+  const socket = new WebSocket(
+    `${protocol}://${location.host}${location.pathname}terminal`
+  );
   socket.binaryType = 'arraybuffer';
 
   socket.onopen = () => {
