@@ -24,9 +24,9 @@ class WebDAV:
     def _build_ui(self):
         ui.label("Currently served WebDAV folders")
         self.table_container = ui.row().classes("w-full overflow-auto")
-        ui.input(label="Base URL", on_change=lambda: self._refresh_ui()).bind_value(
-            app.storage.general, "webdav_base_url"
-        )
+        ui.input(label="Base URL", on_change=lambda: self._refresh_ui()).classes(
+            "w-full"
+        ).bind_value(app.storage.general, "webdav_base_url")
 
         self._refresh_ui()
 

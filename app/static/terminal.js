@@ -13,6 +13,7 @@ function waitForTerminalElement(callback) {
     const el = document.getElementById('terminal');
     if (el) {
       clearInterval(checkInterval);
+      el.innerHTML = '';
       callback(el);
     }
   }, 100);
@@ -60,13 +61,24 @@ function connect() {
   });
 
   const protocol = (location.protocol === 'https:') ? 'wss' : 'ws';
-  const ws_url = `${protocol}://${location.host}/terminal`
-  console.log("Access to web socket:", ws_url)
+  const ws_url = `${protocol}://${location.host}/terminal`;
+  console.log("Access to web socket:", ws_url);
   socket = new WebSocket(ws_url);
   socket.binaryType = 'arraybuffer';
 
+  let timeoutHandle = null;
+
+  function resetTimeout() {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+    timeoutHandle = setTimeout(() => {
+      term.write('\r\n*** Session timeout. Closing connection. ***\r\n');
+      socket.close();
+    }, 300000); // 300000 = 5 minutes
+  }
+
   socket.onopen = () => {
     safeSend(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+    resetTimeout();
   };
 
   socket.onclose = () => {
@@ -83,7 +95,10 @@ function connect() {
     term.write(text);
   };
 
-  term.onData(data => safeSend(data));
+  term.onData(data => {
+    resetTimeout();
+    safeSend(data)
+  });
 
   term.onResize(({ cols, rows }) => {
     safeSend(JSON.stringify({ type: 'resize', cols, rows }));

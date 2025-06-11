@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+- Fixed some UI issues (duplicated terminal, base path length, home screen)
+
 ## 0.1.4
 
 - Corrected `root_path` usage with terminal's web socket

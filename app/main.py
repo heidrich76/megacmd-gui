@@ -34,6 +34,7 @@ It allows using MEGAcmd for synchronizing your files with the [MEGA cloud](https
 - [Complete MEGAcmd user guide](https://github.com/meganz/MEGAcmd/blob/master/UserGuide.md)
 """
     )
+    layout._refresh_ui()
 
 
 app.add_static_files("/static", "static")

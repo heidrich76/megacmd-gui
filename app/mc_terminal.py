@@ -2,14 +2,14 @@ from nicegui import ui, app
 from fastapi import WebSocket
 from pathlib import Path
 import asyncio
+import fcntl
+import json
 import os
 import pty
 import select
-import threading
-import fcntl
-import termios
 import struct
-import json
+import threading
+import termios
 from mc_layout import Layout, create_warning_label
 
 js_path = Path(__file__).parent / "static" / "terminal.js"
