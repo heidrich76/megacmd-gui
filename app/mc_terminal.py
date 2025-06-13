@@ -33,7 +33,7 @@ def terminal_page():
     )
 
     with ui.column().props("id=terminal").classes(
-        "w-full min-h-[400px] h-[calc(100vh-160px)] shadow-lg"
+        "w-full min-h-[400px] h-[calc(100dvh-120px)] shadow-lg"
     ):
         pass
 
