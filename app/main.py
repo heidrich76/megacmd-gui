@@ -1,13 +1,14 @@
 from nicegui import app, ui
 import argparse
 import importlib
-from mc_layout import Layout
+from mc_layout import Layout, create_warning_label
 
 importlib.import_module("mc_sync")
 importlib.import_module("mc_webdav")
 importlib.import_module("mc_backup")
 importlib.import_module("mc_mount")
 importlib.import_module("mc_terminal")
+importlib.import_module("mc_settings")
 
 
 @ui.page("/")
@@ -16,12 +17,22 @@ def index_page():
     ui.page_title("Home")
 
     ui.label("Home").classes("text-h5")
+    ui.add_css(
+        """
+.nicegui-markdown a, .nicegui-markdown a:visited {
+    color: grey;
+    text-decoration: none;
+}
+.nicegui-markdown a:hover {
+    color: grey;
+    text-decoration: underline;
+}
+"""
+    )
     ui.markdown(
         """
 This app provides a simple web-based user interface for [MEGAcmd](https://github.com/meganz/MEGAcmd).
 It allows using MEGAcmd for synchronizing your files with the [MEGA cloud](https://mega.nz/).
-
-> ⚠️ This add-on is provided _as-is_. Use at your own risk.
 
 **Features**
 
@@ -34,7 +45,8 @@ It allows using MEGAcmd for synchronizing your files with the [MEGA cloud](https
 - [Complete MEGAcmd user guide](https://github.com/meganz/MEGAcmd/blob/master/UserGuide.md)
 """
     )
-    layout._refresh_ui()
+    create_warning_label("This add-on is provided as-is. Use at your own risk.")
+    layout.check_login()
 
 
 app.add_static_files("/static", "static")

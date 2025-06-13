@@ -26,6 +26,7 @@
   "runArgs": [
     "--name",
     "megacmd-gui-dev",
+    "--net=host",
     "--cap-add=SYS_ADMIN",
     "--device=/dev/fuse",
     "--security-opt",

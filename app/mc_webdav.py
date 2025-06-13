@@ -9,21 +9,21 @@ def webdav_page():
     layout = Layout()
     ui.page_title("WebDAV")
 
-    with ui.column().classes("w-full") as tab_container:
+    with ui.column().classes("w-full"):
         ui.label("WebDAV").classes("text-h5")
         WebDAV()
-    layout.set_tab_container(tab_container)
+    layout.check_login()
 
 
 class WebDAV:
     def __init__(self):
-        self.local_paths = []
-        self.table_container = None
+        self._local_paths = []
+        self._table_container = None
         self._build_ui()
 
     def _build_ui(self):
         ui.label("Currently served WebDAV folders")
-        self.table_container = ui.row().classes("w-full overflow-auto")
+        self._table_container = ui.row().classes("w-full overflow-auto")
         ui.input(label="Base URL", on_change=lambda: self._refresh_ui()).classes(
             "w-full"
         ).bind_value(app.storage.general, "webdav_base_url")
@@ -72,7 +72,7 @@ class WebDAV:
         def open_unserve_dialog():
             self._refresh_ui()
             path_select.clear()
-            path_select.set_options(self.local_paths)
+            path_select.set_options(self._local_paths)
             unserve_dialog.open()
 
         with ui.row():
@@ -81,11 +81,11 @@ class WebDAV:
             ui.button(icon="refresh", on_click=self._refresh_ui).classes("mt-6")
 
     def _refresh_ui(self):
-        self.table_container.clear()
+        self._table_container.clear()
         base_url = app.storage.general.get("webdav_base_url", "")
-        columns, rows, self.local_paths = list_webdavs(base_url)
+        columns, rows, self._local_paths = list_webdavs(base_url)
 
-        with self.table_container:
+        with self._table_container:
             table = ui.table(columns=columns, rows=rows).classes("w-full")
             table.add_slot(
                 "body-cell-URL",

@@ -18,7 +18,7 @@ js_code = js_path.read_text(encoding="utf8")
 
 @ui.page("/terminal")
 def terminal_page():
-    layout = Layout()
+    Layout()
     ui.page_title("Terminal")
     ui.label("Terminal").classes("text-h5")
 
@@ -43,8 +43,6 @@ def terminal_page():
         "w-full min-h-[400px] h-[calc(100vh-320px)] shadow-lg"
     ):
         pass
-
-    layout._refresh_ui()
 
 
 @app.websocket("/terminal")

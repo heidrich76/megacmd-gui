@@ -9,21 +9,21 @@ def sync_page():
     layout = Layout()
     ui.page_title("Synchronization")
 
-    with ui.column().classes("w-full") as tab_container:
+    with ui.column().classes("w-full"):
         ui.label("Synchronization").classes("text-h5")
         Synchronization()
-    layout.set_tab_container(tab_container)
+    layout.check_login()
 
 
 class Synchronization:
     def __init__(self):
-        self.local_paths = []
-        self.table_container = None
+        self._local_paths = []
+        self._table_container = None
         self._build_ui()
 
     def _build_ui(self):
         ui.label("List of local and cloud folders synchronized")
-        self.table_container = ui.row().classes("w-full overflow-auto")
+        self._table_container = ui.row().classes("w-full overflow-auto")
         self._refresh_ui()
 
         # Add dialog
@@ -48,7 +48,7 @@ class Synchronization:
         # Delete dialog
         with ui.dialog() as delete_dialog, ui.card():
             ui.label("Delete Synchronization Pair").classes("text-lg font-bold")
-            selected_local = ui.select(self.local_paths, label="Select").classes(
+            selected_local = ui.select(self._local_paths, label="Select").classes(
                 "w-full"
             )
 
@@ -70,7 +70,7 @@ class Synchronization:
             def open_remove_dialog():
                 self._refresh_ui()
                 selected_local.clear()
-                selected_local.set_options(self.local_paths)
+                selected_local.set_options(self._local_paths)
                 delete_dialog.open()
 
             ui.button(icon="add", on_click=open_add_dialog).classes("mt-6")
@@ -78,7 +78,7 @@ class Synchronization:
             ui.button(icon="refresh", on_click=self._refresh_ui).classes("mt-6")
 
     def _refresh_ui(self):
-        self.table_container.clear()
-        columns, rows, self.local_paths = list_syncs()
-        with self.table_container:
+        self._table_container.clear()
+        columns, rows, self._local_paths = list_syncs()
+        with self._table_container:
             ui.table(columns=columns, rows=rows).classes("w-full")
