@@ -10,10 +10,10 @@ function safeSend(message) {
 
 function waitForTerminalElement(callback) {
   const checkInterval = setInterval(() => {
-    const el = document.getElementById('terminal');
+    const el = document.getElementById("terminal");
     if (el) {
       clearInterval(checkInterval);
-      el.innerHTML = '';
+      el.innerHTML = "";
       callback(el);
     }
   }, 100);
@@ -21,28 +21,28 @@ function waitForTerminalElement(callback) {
 
 function connect() {
   term = new Terminal({
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
     fontSize: 16,
     theme: {
-      background: '#1e1e1e',
-      foreground: '#cccccc',
-      cursor: '#cccccc',
-      black: '#1e1e1e',
-      red: '#d16969',
-      green: '#b5cea8',
-      yellow: '#d7ba7d',
-      blue: '#569cd6',
-      magenta: '#c586c0',
-      cyan: '#9cdcfe',
-      white: '#d4d4d4',
-      brightBlack: '#666666',
-      brightRed: '#f44747',
-      brightGreen: '#c8e1a8',
-      brightYellow: '#ffcb6b',
-      brightBlue: '#82aaff',
-      brightMagenta: '#d291e4',
-      brightCyan: '#9cdcfe',
-      brightWhite: '#ffffff'
+      background: "#1e1e1e",
+      foreground: "#cccccc",
+      cursor: "#cccccc",
+      black: "#1e1e1e",
+      red: "#d16969",
+      green: "#b5cea8",
+      yellow: "#d7ba7d",
+      blue: "#569cd6",
+      magenta: "#c586c0",
+      cyan: "#9cdcfe",
+      white: "#d4d4d4",
+      brightBlack: "#666666",
+      brightRed: "#f44747",
+      brightGreen: "#c8e1a8",
+      brightYellow: "#ffcb6b",
+      brightBlue: "#82aaff",
+      brightMagenta: "#d291e4",
+      brightCyan: "#9cdcfe",
+      brightWhite: "#ffffff"
     }
   });
 
@@ -53,36 +53,47 @@ function connect() {
     term.open(el);
     fitAddon.fit();
 
+    term.writeln("\x1b[31m*** Terminal is for expert users and gives full access to the MEGAcmd container. ***\x1b[0m")
+
     const observer = new ResizeObserver(() => {
       fitAddon.fit();
-      safeSend(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+      safeSend(JSON.stringify({ type: "resize", cols: term.cols, rows: term.rows }));
     });
     observer.observe(el);
   });
 
-  const protocol = (location.protocol === 'https:') ? 'wss' : 'ws';
+  const protocol = (location.protocol === "https:") ? "wss" : "ws";
   const ws_url = `${protocol}://${location.host}/terminal`;
   console.log("Access to web socket:", ws_url);
   socket = new WebSocket(ws_url);
-  socket.binaryType = 'arraybuffer';
+  socket.binaryType = "arraybuffer";
+
+  let pingHandle = null;
+  function setPing() {
+    if (pingHandle) clearInterval(pingHandle);
+    pingHandle = setInterval(() => {
+      console.log("Send ping to socket...")
+      safeSend(JSON.stringify({ type: 'ping' }));
+    }, 10000); // Every 10 seconds
+  }
 
   let timeoutHandle = null;
-
   function resetTimeout() {
     if (timeoutHandle) clearTimeout(timeoutHandle);
     timeoutHandle = setTimeout(() => {
-      term.write('\r\n*** Session timeout. Closing connection. ***\r\n');
       socket.close();
-    }, 300000); // 300000 = 5 minutes
+    }, 300000); // After 5 minutes
   }
 
   socket.onopen = () => {
-    safeSend(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+    safeSend(JSON.stringify({ type: "resize", cols: term.cols, rows: term.rows }));
     resetTimeout();
+    setPing();
   };
 
   socket.onclose = () => {
-    term.write('\r\n*** Disconnected. Reconnecting in 1s... ***\r\n');
+    term.writeln("")
+    term.writeln("*** Disconnected. Reconnecting in 1s... ***");
     setTimeout(connect, 1000);
   };
 
@@ -101,10 +112,10 @@ function connect() {
   });
 
   term.onResize(({ cols, rows }) => {
-    safeSend(JSON.stringify({ type: 'resize', cols, rows }));
+    safeSend(JSON.stringify({ type: "resize", cols, rows }));
   });
 
-  window.addEventListener('resize', () => fitAddon.fit());
+  window.addEventListener("resize", () => fitAddon.fit());
 }
 
-document.addEventListener('DOMContentLoaded', connect);
+document.addEventListener("DOMContentLoaded", connect);

@@ -20,13 +20,6 @@ js_code = js_path.read_text(encoding="utf8")
 def terminal_page():
     Layout()
     ui.page_title("Terminal")
-    ui.label("Terminal").classes("text-h5")
-
-    with ui.row().classes("items-center"):
-        ui.label(
-            "Terminal is for expert users and gives full access to the MEGAcmd container"
-        )
-        create_warning_label("Be carefull!")
 
     root_path = app.storage.general.get("root_path", "")
     rp_js_code = js_code.replace("/terminal", f"{root_path}/terminal")
@@ -40,7 +33,7 @@ def terminal_page():
     )
 
     with ui.column().props("id=terminal").classes(
-        "w-full min-h-[400px] h-[calc(100vh-320px)] shadow-lg"
+        "w-full min-h-[400px] h-[calc(100vh-160px)] shadow-lg"
     ):
         pass
 
@@ -90,6 +83,8 @@ async def terminal_socket(websocket: WebSocket):
                         cols = obj.get("cols", 80)
                         rows = obj.get("rows", 24)
                         resize(cols, rows)
+                        continue
+                    elif obj.get("type") == "ping":
                         continue
                 except json.JSONDecodeError:
                     pass
