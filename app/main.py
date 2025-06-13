@@ -31,8 +31,8 @@ def index_page():
     )
     ui.markdown(
         """
-This app provides a simple web-based user interface for [MEGAcmd](https://github.com/meganz/MEGAcmd).
-It allows using MEGAcmd for synchronizing your files with the [MEGA cloud](https://mega.nz/).
+This app provides a simple web-based user interface for <a href="https://github.com/meganz/MEGAcmd" target="_blank">MEGAcmd</a>.
+It allows using MEGAcmd for synchronizing your files with the <a href="https://mega.nz/" target="_blank">MEGA cloud</a>.
 
 **Features**
 
@@ -42,7 +42,7 @@ It allows using MEGAcmd for synchronizing your files with the [MEGA cloud](https
 - **Backup Management:** Dedicated functionality for creating and managing backups to your MEGA cloud storage.
 - **Cloud Drive Mounting:** Mount your MEGA cloud storage as a local filesystem for seamless access through your operating system's file explorer.
 - **Integrated Terminal Access:** Provides direct command-line access to MegaCMD for advanced operations and scripting within the web interface.
-- [Complete MEGAcmd user guide](https://github.com/meganz/MEGAcmd/blob/master/UserGuide.md)
+- Complete MEGAcmd user guide is available <a href="https://github.com/meganz/MEGAcmd/blob/master/UserGuide.md" target="_blank">here</a>.
 """
     )
     create_warning_label("This add-on is provided as-is. Use at your own risk.")
