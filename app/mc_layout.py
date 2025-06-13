@@ -9,6 +9,10 @@ def create_warning_label(text):
     )
 
 
+def get_active_page():
+    return "/" + context.client.request.url.path.split("/")[-1]
+
+
 class Layout:
     def __init__(self):
         self._user_label = None
@@ -17,12 +21,13 @@ class Layout:
         self._build_ui()
 
     def _build_ui(self):
-        current_path = context.client.request.url.path
+        active_page = get_active_page()
+        app.storage.general["active_page"] = active_page
         self.dark = ui.dark_mode(app.storage.general.get("dark", None))
         self.dark.bind_value(app.storage.general, "dark")
 
         def menu_button(text, link, icon="link"):
-            active = current_path.endswith(link)
+            active = active_page == link
             button = (
                 ui.button(text, on_click=lambda: ui.navigate.to(link), icon=icon)
                 .classes("w-full")
@@ -38,7 +43,7 @@ class Layout:
         with ui.left_drawer(fixed=False).props("bordered") as drawer:
             with ui.column().classes("h-full w-full justify-between"):
                 with ui.column().classes("w-full"):
-                    menu_button("Home", "/", "home")
+                    menu_button("Home", "/home", "home")
                     menu_button("Synchronization", "/sync", "sync")
                     menu_button("WebDAV", "/webdav", "cloud")
                     menu_button("Backup", "/backup", "backup")
@@ -69,7 +74,7 @@ class Layout:
                 login_button.enable()
                 await_dialog.close()
                 self._login_dialog.close()
-                ui.navigate.to("/")
+                ui.navigate.to("/home")
 
             with ui.row():
                 ui.button("Cancel", on_click=self._login_dialog.close)

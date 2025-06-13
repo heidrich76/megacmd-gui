@@ -14,7 +14,7 @@ def settings_page():
         def on_logout():
             logout()
             logout_dialog.close()
-            ui.navigate.to("/")
+            ui.navigate.to("/home")
 
         with ui.row():
             ui.button("Cancel", on_click=logout_dialog.close)
