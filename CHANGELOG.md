@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6
+
+- Reworked layout of drawer menu
+- Created new settings page and moved dark mode switch and logout button to the page
+- Send alive ping from terminal to socket
+- Remember last page opened and forward to this page
+
 ## 0.1.5
 
 - Fixed some UI issues (duplicated terminal, base path length, home screen)
