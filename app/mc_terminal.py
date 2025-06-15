@@ -29,7 +29,7 @@ def terminal_page():
     )
     create_warning_label("Be careful, you have full access to the container")
 
-    with ui.column().props("id=terminal").classes(
-        "w-full min-h-[400px] h-[calc(100dvh-200px)] shadow-lg"
-    ):
-        pass
+    with ui.column().classes("w-full"):
+        ui.column().props("id=terminal").classes(
+            "w-full min-h-[400px] h-[calc(100dvh-200px)]"
+        )
