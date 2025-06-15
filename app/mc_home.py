@@ -1,11 +1,8 @@
 from nicegui import ui
-from mc_layout import Layout, create_warning_label
+from mc_layout import create_warning_label
 
 
-@ui.page("/home")
-def index_page():
-    layout = Layout()
-
+def home_page():
     ui.page_title("Home")
 
     ui.label("Home").classes("text-h5")
@@ -38,4 +35,3 @@ It allows using MEGAcmd for synchronizing your files with the <a href="https://m
 """
     )
     create_warning_label("This add-on is provided as-is. Use at your own risk.")
-    layout.check_login()

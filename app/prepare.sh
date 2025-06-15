@@ -3,8 +3,8 @@ set -x
 
 cd "$(dirname "$0")"
 
-if [ ! -f "$CONFIG_HOME/root/machine-id" ]; then
-    uuidgen >"$CONFIG_HOME/root/machine-id"
+if [ ! -f "$CONFIG_HOME/machine-id" ]; then
+    uuidgen >"$CONFIG_HOME/machine-id"
 fi
 
 if [ ! -e "/etc/machine-id" ]; then

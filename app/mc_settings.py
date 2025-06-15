@@ -1,11 +1,8 @@
-from nicegui import app, ui
-from mc_layout import Layout
-from mc_subprocess import whoami, version, logout
+from nicegui import ui
+from mc_subprocess import whoami, version, logout, is_logged_in
 
 
-@ui.page("/settings")
-def settings_page():
-    layout = Layout()
+def settings_page(dark):
     ui.page_title("Settings")
 
     with ui.dialog() as logout_dialog, ui.card():
@@ -14,7 +11,7 @@ def settings_page():
         def on_logout():
             logout()
             logout_dialog.close()
-            ui.navigate.to("/home")
+            ui.navigate.reload()
 
         with ui.row():
             ui.button("Cancel", on_click=logout_dialog.close)
@@ -34,9 +31,9 @@ def settings_page():
             reversed_options = {None: "Auto", False: "Light", True: "Dark"}
             dark_select = ui.select(
                 options=list(options.keys()),
-                on_change=lambda e: setattr(layout.dark, "value", options[e.value]),
+                on_change=lambda e: setattr(dark, "value", options[e.value]),
             ).props("dense")
-            dark_select.value = reversed_options[layout.dark.value]
+            dark_select.value = reversed_options[dark.value]
 
-    if not layout.check_login():
+    if is_logged_in():
         ui.button("Logout", on_click=logout_dialog.open)

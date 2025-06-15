@@ -90,6 +90,10 @@ def whoami():
         return ""
 
 
+def is_logged_in():
+    return whoami() != ""
+
+
 async def login(email, password):
     try:
         proc = subprocess.Popen(

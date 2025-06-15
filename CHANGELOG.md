@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7
+
+- Use tmux for xterm
+- Fixed machine-id problem
+- Moved to NiceGUI single page layout
+- Improved NiceGUI refresh
+
 ## 0.1.6
 
 - Reworked layout of drawer menu
