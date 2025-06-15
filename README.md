@@ -71,7 +71,7 @@ Getting started with development is streamlined using VSCode Dev Containers. Fol
   ```
 - To access a shell within your running development container (e.g., for debugging or running commands manually):
   ```bash
-  docker exec -it megacmd-gui-dev /bin/bash
+  docker exec -it megacmd-gui-compose-dev /bin/bash
   ```
 - Initiating a GitHub build by creating and pushing a tag to the repository:
   ```bash

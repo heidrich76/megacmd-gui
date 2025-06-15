@@ -1,6 +1,6 @@
 services:
   megacmd-gui:
-    container_name: megacmd-gui
+    container_name: megacmd-gui-compose-dev
     build:
       context: .
       dockerfile: Dockerfile

@@ -1,5 +1,11 @@
 #!/bin/sh
 set -x
 
+SESSION="default"
+
+if ! tmux has-session -t "$SESSION" 2>/dev/null; then
+  tmux new-session -d -s "$SESSION"
+fi
+
 cd "$(dirname "$0")"
-python3 main.py
+exec python3 main.py
