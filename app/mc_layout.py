@@ -12,6 +12,10 @@ def add_tabs_style():
     ui.add_css(
         """
         @media (max-width: 650px) {
+            .q-tab {
+                padding-left: 0.25rem;
+                padding-right: 0.25rem;
+            }
             .q-tab__label {
                 display: none;
             }
@@ -21,4 +25,4 @@ def add_tabs_style():
 
 
 def create_tab(name, label, icon):
-    ui.tab(name=name, label=label, icon=icon).props("no-caps dense")
+    ui.tab(name=name, label=label, icon=icon).props("no-caps")

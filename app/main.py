@@ -27,16 +27,17 @@ def index_page():
         app.storage.general["active_page"] = tab_name
 
     add_tabs_style()
-    with ui.tabs() as tabs:
-        create_tab("/home", "Home", "home")
-        create_tab("/sync", "Synchronization", "sync")
-        create_tab("/webdav", "WebDAV", "cloud")
-        create_tab("/backup", "Backup", "backup")
-        create_tab("/mount", "Mount", "storage")
-        create_tab("/terminal", "Terminal", "terminal")
-        create_tab("/settings", "Settings", "settings")
+    with ui.header().classes("py-0"):
+        with ui.tabs().classes("py-0") as tabs:
+            create_tab("/home", "Home", "home")
+            create_tab("/sync", "Synchronization", "sync")
+            create_tab("/webdav", "WebDAV", "cloud")
+            create_tab("/backup", "Backup", "backup")
+            create_tab("/mount", "Mount", "storage")
+            create_tab("/terminal", "Terminal", "terminal")
+            create_tab("/settings", "Settings", "settings")
 
-    tabs.on("update:model-value", lambda e: on_tab_change(e.args))
+        tabs.on("update:model-value", lambda e: on_tab_change(e.args))
 
     with ui.tab_panels(tabs, value=last_active_page).classes("w-full"):
         with ui.tab_panel("/home"):

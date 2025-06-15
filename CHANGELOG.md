@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.8
+
+- Fixed tmux issue
+- Moved tab selection to header
+
 ## 0.1.7
 
 - Use tmux for xterm
