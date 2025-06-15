@@ -24,7 +24,7 @@ To get the application up and running, you'll first download and start its Docke
 
 - **Download and Start Container:** This command pulls the latest image from Docker Hub and forwards port `8080` to your host machine. For persistently storing configuration and synchronization data, a Docker volume named `root-volume` is created.
   ```bash
-  docker run -d --name megacmd-gui -p 8080:8080 -v root-volume:/root jensheidrich76/megacmd-gui:latest
+  docker run -itd --name megacmd-gui -p 8080:8080 -v root-volume:/root jensheidrich76/megacmd-gui:latest
   ```
 - **Start Shell in Container:** If you need to interact directly with the running container, this command opens an interactive bash shell:
   ```bash
@@ -50,7 +50,7 @@ For Windows users, this functionality is primarily confined to the Docker-Deskto
 * **Start Container with Bind Propagation:**
     This command initiates the container with the necessary FUSE permissions and sets up the recursive bind propagation from the prepared host folder to a folder within the container.
     ```bash
-    docker run -d --name megacmd-gui -p 8080:8080 -v root-volume:/root --cap-add=SYS_ADMIN --device=/dev/fuse --security-opt apparmor:unconfined --mount type=bind,src=/mnt/mega,dst=/mnt/mega,bind-propagation=rshared jensheidrich76/megacmd-gui:latest
+    docker run -itd --name megacmd-gui -p 8080:8080 -v root-volume:/root --cap-add=SYS_ADMIN --device=/dev/fuse --security-opt apparmor:unconfined --mount type=bind,src=/mnt/mega,dst=/mnt/mega,bind-propagation=rshared jensheidrich76/megacmd-gui:latest
     ```
     This command grants the container the required permissions (`--cap-add=SYS_ADMIN`, `--device=/dev/fuse`, `--security-opt apparmor:unconfined`) for FUSE operations. It then establishes a recursive bind mount from the pre-created host directory `/mnt/mega` to `/mnt/mega` inside the container, ensuring that the FUSE mount performed within the container is properly propagated and visible on the host.
 
