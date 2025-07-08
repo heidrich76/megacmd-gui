@@ -19,7 +19,12 @@ def _parse_table(stdout, split_string="###"):
         return [], []
     headers = lines[0].split("###")
     columns = _create_table_header(headers)
-    rows = [dict(zip(headers, row.split("###"))) for row in lines[1:]]
+    rows = []
+    for line in lines[1:]:
+        if not line.strip():
+            break
+        row = dict(zip(headers, line.split("###")))
+        rows.append(row)
     return columns, rows
 
 
@@ -175,8 +180,35 @@ def add_sync(local_path, remote_path):
 
 
 @notify_wrapper
-def remove_sync(local_path: str):
+def remove_sync(local_path):
     return subprocess.run(["mega-sync", "-d", local_path], **sp_common)
+
+
+def list_sync_issues():
+    try:
+        result = subprocess.run(
+            ["mega-sync-issues", "--col-separator=###"],
+            **sp_common,
+        )
+        columns, rows = _parse_table(stdout=result.stdout, split_string="###")
+        return columns, rows
+    except CalledProcessError:
+        return [], [], []
+
+
+def list_sync_issue_details(issue_id):
+    try:
+        result = subprocess.run(
+            ["mega-sync-issues", "--col-separator=###", "--detail", issue_id],
+            **sp_common,
+        )
+
+        # Determine issue to deal with
+        description, raw_table = result.stdout.split("\n\n", 1)
+        columns, rows = _parse_table(stdout=raw_table, split_string="###")
+        return description, columns, rows
+    except CalledProcessError:
+        return [], [], []
 
 
 def list_webdavs(base_url=""):

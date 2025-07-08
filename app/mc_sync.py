@@ -1,10 +1,18 @@
 from nicegui import ui
 from mc_directories import DirectorySelector
-from mc_subprocess import list_syncs, add_sync, remove_sync
+from mc_layout import create_action_table
+from mc_subprocess import (
+    list_syncs,
+    add_sync,
+    remove_sync,
+    list_sync_issues,
+    list_sync_issue_details,
+)
 
 
 @ui.refreshable
 def create_sync_table():
+    # Show synchronization table
     columns, rows, local_paths = list_syncs()
     with ui.row().classes("w-full overflow-auto"):
         ui.table(columns=columns, rows=rows).classes("w-full")
@@ -46,6 +54,28 @@ def create_sync_table():
         ui.button(icon="add", on_click=add_dialog.open).classes("mt-6")
         ui.button(icon="delete", on_click=delete_dialog.open).classes("mt-6")
         ui.button(icon="refresh", on_click=create_sync_table.refresh).classes("mt-6")
+
+    # Show issues table with details button
+    ui.label("Issues").classes("text-h6")
+    columns, rows = list_sync_issues()
+
+    def show_issue_dialog(row):
+        issue_id = row["ISSUE_ID"]
+        description, columns, rows = list_sync_issue_details(issue_id)
+        with ui.dialog() as dialog, ui.card().classes("w-full").style(
+            "max-width: 90vw;"
+        ):
+            ui.label("Issue").classes("text-lg font-bold")
+            ui.label(description).style("white-space: pre-wrap")
+            ui.table(columns=columns, rows=rows).classes("w-full")
+
+            ui.button("Close", on_click=dialog.close)
+        dialog.open()
+
+    with ui.row().classes("w-full overflow-auto"):
+        create_action_table(
+            columns=columns, rows=rows, callback=show_issue_dialog
+        ).classes("w-full")
 
 
 def sync_page():
