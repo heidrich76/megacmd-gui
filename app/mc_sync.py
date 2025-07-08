@@ -12,10 +12,29 @@ from mc_subprocess import (
 
 @ui.refreshable
 def create_sync_table():
+    # Delete dialog
+    def show_delete_dialog(row):
+        with ui.dialog() as dialog, ui.card():
+            ui.label("Delete Synchronization Pair").classes("text-lg font-bold")
+            ui.label(f"Local Path: {row["LOCALPATH"]}")
+            ui.label(f"Remote Path: {row["REMOTEPATH"]}")
+
+            def on_delete():
+                remove_sync(row["LOCALPATH"])
+                dialog.close()
+                create_sync_table.refresh()
+
+            with ui.row():
+                ui.button("Cancel", on_click=dialog.close)
+                ui.button("OK", color="red", on_click=on_delete)
+        dialog.open()
+
     # Show synchronization table
     columns, rows, local_paths = list_syncs()
     with ui.row().classes("w-full overflow-auto"):
-        ui.table(columns=columns, rows=rows).classes("w-full")
+        create_action_table(
+            columns=columns, rows=rows, callback=show_delete_dialog, icon="delete"
+        ).classes("w-full")
 
     # Add dialog
     with ui.dialog() as add_dialog, ui.card():
@@ -36,36 +55,19 @@ def create_sync_table():
             ui.button("Cancel", on_click=add_dialog.close)
             ui.button("OK", on_click=on_add)
 
-    # Delete dialog
-    with ui.dialog() as delete_dialog, ui.card():
-        ui.label("Delete Synchronization Pair").classes("text-lg font-bold")
-        selected_local = ui.select(local_paths, label="Select").classes("w-full")
-
-        def on_delete():
-            remove_sync(selected_local.value)
-            delete_dialog.close()
-            create_sync_table.refresh()
-
-        with ui.row():
-            ui.button("Cancel", on_click=delete_dialog.close)
-            ui.button("OK", color="red", on_click=on_delete)
-
     with ui.row():
         ui.button(icon="add", on_click=add_dialog.open).classes("mt-6")
-        ui.button(icon="delete", on_click=delete_dialog.open).classes("mt-6")
         ui.button(icon="refresh", on_click=create_sync_table.refresh).classes("mt-6")
 
     # Show issues table with details button
     ui.label("Issues").classes("text-h6")
-    columns, rows = list_sync_issues()
 
     def show_issue_dialog(row):
-        issue_id = row["ISSUE_ID"]
-        description, columns, rows = list_sync_issue_details(issue_id)
         with ui.dialog() as dialog, ui.card().classes("w-full").style(
             "max-width: 90vw;"
         ):
             ui.label("Issue").classes("text-lg font-bold")
+            description, columns, rows = list_sync_issue_details(row["ISSUE_ID"])
             ui.label(description).style("white-space: pre-wrap")
             ui.table(columns=columns, rows=rows).classes("w-full")
 
@@ -73,6 +75,7 @@ def create_sync_table():
         dialog.open()
 
     with ui.row().classes("w-full overflow-auto"):
+        columns, rows = list_sync_issues()
         create_action_table(
             columns=columns, rows=rows, callback=show_issue_dialog
         ).classes("w-full")

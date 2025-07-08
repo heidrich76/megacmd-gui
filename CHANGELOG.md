@@ -6,6 +6,7 @@
 - Bumped megacmd to v2.1.1b4
 - Start mega-cmd-server before GUI
 - Added GUI for sync issues
+- Moved delete functions to tables
 
 ## 0.1.8
 
