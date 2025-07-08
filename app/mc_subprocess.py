@@ -165,10 +165,9 @@ def list_syncs():
             **sp_common,
         )
         columns, rows = _parse_table(stdout=result.stdout, split_string="###")
-        local_paths = [row["LOCALPATH"] for row in rows]
-        return columns, rows, local_paths
+        return columns, rows
     except CalledProcessError:
-        return [], [], []
+        return [], []
 
 
 @notify_wrapper
@@ -193,7 +192,7 @@ def list_sync_issues():
         columns, rows = _parse_table(stdout=result.stdout, split_string="###")
         return columns, rows
     except CalledProcessError:
-        return [], [], []
+        return [], []
 
 
 def list_sync_issue_details(issue_id):
@@ -208,7 +207,7 @@ def list_sync_issue_details(issue_id):
         columns, rows = _parse_table(stdout=raw_table, split_string="###")
         return description, columns, rows
     except CalledProcessError:
-        return [], [], []
+        return [], []
 
 
 def list_webdavs(base_url=""):
@@ -229,11 +228,10 @@ def list_webdavs(base_url=""):
                     url = base_url.rstrip("/") + url_path
                 rows.append({"PATH": path, "URL": url})
         rows.sort(key=lambda e: e["PATH"])
-        local_paths = [row["PATH"] for row in rows]
-        return columns, rows, local_paths
+        return columns, rows
 
     except CalledProcessError:
-        return [], [], []
+        return [], []
 
 
 @notify_wrapper

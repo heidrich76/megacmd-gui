@@ -30,7 +30,7 @@ def create_sync_table():
         dialog.open()
 
     # Show synchronization table
-    columns, rows, local_paths = list_syncs()
+    columns, rows = list_syncs()
     with ui.row().classes("w-full overflow-auto"):
         create_action_table(
             columns=columns, rows=rows, callback=show_delete_dialog, icon="delete"
