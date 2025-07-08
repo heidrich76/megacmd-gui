@@ -2,9 +2,9 @@
 
 ## 0.1.9
 
-- Bumped base image to alpine:3.22
-- Bumped megacmd to v2.1.1b4
-- Start mega-cmd-server before GUI
+- Bumped base image to `alpine:3.22`
+- Bumped megacmd to `v2.1.1b4`
+- Start `mega-cmd-server` before GUI
 - Added GUI for sync issues
 - Moved delete functions to tables
 
