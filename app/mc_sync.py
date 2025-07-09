@@ -7,6 +7,7 @@ from mc_subprocess import (
     remove_sync,
     list_sync_issues,
     list_sync_issue_details,
+    remove_sync_issue,
 )
 
 

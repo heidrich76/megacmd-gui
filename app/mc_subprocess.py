@@ -6,24 +6,25 @@ import subprocess
 from subprocess import CalledProcessError
 from urllib.parse import urlparse
 
-sp_common = {"capture_output": True, "text": True, "check": True}
+_sp_common = {"capture_output": True, "text": True, "check": True}
+_column_sep = "###"
 
 
 def _create_table_header(headers):
     return [{"name": h, "label": h, "field": h, "align": "left"} for h in headers]
 
 
-def _parse_table(stdout, split_string="###"):
+def _parse_table(stdout):
     lines = stdout.strip().splitlines()
     if len(lines) < 2:
         return [], []
-    headers = lines[0].split("###")
+    headers = lines[0].split(_column_sep)
     columns = _create_table_header(headers)
     rows = []
     for line in lines[1:]:
         if not line.strip():
             break
-        row = dict(zip(headers, line.split("###")))
+        row = dict(zip(headers, line.split(_column_sep)))
         rows.append(row)
     return columns, rows
 
@@ -71,7 +72,7 @@ def notify_wrapper(func):
 
 def version():
     try:
-        result = subprocess.run(["mega-version"], **sp_common)
+        result = subprocess.run(["mega-version"], **_sp_common)
         version = ""
         raw = result.stdout.strip()
         match = re.search(r"(?<=MEGAcmd version:\s)(\d+\.\d+\.\d+\.\d+)", raw)
@@ -84,7 +85,7 @@ def version():
 
 def whoami():
     try:
-        result = subprocess.run(["mega-whoami"], **sp_common)
+        result = subprocess.run(["mega-whoami"], **_sp_common)
         whoami = ""
         raw = result.stdout.strip()
         match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", raw)
@@ -114,7 +115,7 @@ async def login(email, password):
 
 @notify_wrapper
 def logout():
-    return subprocess.run(["mega-logout"], **sp_common)
+    return subprocess.run(["mega-logout"], **_sp_common)
 
 
 def ls(path, is_remote=False):
@@ -123,7 +124,7 @@ def ls(path, is_remote=False):
             result = subprocess.run(
                 f'ls -1F "{path}" | grep "/$"',
                 shell=True,
-                **sp_common,
+                **_sp_common,
             )
             dirs = []
             lines = result.stdout.strip().splitlines()
@@ -135,7 +136,7 @@ def ls(path, is_remote=False):
             result = subprocess.run(
                 f'mega-ls -a "{path}" | grep "(folder)$"',
                 shell=True,
-                **sp_common,
+                **_sp_common,
             )
             dirs = []
             lines = result.stdout.strip().splitlines()
@@ -155,16 +156,16 @@ def mkdir(path, new_dir, is_remote=False):
     cmd = "mkdir"
     if is_remote:
         cmd = "mega-mkdir"
-    return subprocess.run([cmd, full_path], **sp_common)
+    return subprocess.run([cmd, full_path], **_sp_common)
 
 
 def list_syncs():
     try:
         result = subprocess.run(
-            ["mega-sync", "--col-separator=###"],
-            **sp_common,
+            ["mega-sync", f"--col-separator={_column_sep}"],
+            **_sp_common,
         )
-        columns, rows = _parse_table(stdout=result.stdout, split_string="###")
+        columns, rows = _parse_table(stdout=result.stdout)
         return columns, rows
     except CalledProcessError:
         return [], []
@@ -174,22 +175,22 @@ def list_syncs():
 def add_sync(local_path, remote_path):
     return subprocess.run(
         ["mega-sync", local_path, remote_path],
-        **sp_common,
+        **_sp_common,
     )
 
 
 @notify_wrapper
 def remove_sync(local_path):
-    return subprocess.run(["mega-sync", "-d", local_path], **sp_common)
+    return subprocess.run(["mega-sync", "-d", local_path], **_sp_common)
 
 
 def list_sync_issues():
     try:
         result = subprocess.run(
-            ["mega-sync-issues", "--col-separator=###"],
-            **sp_common,
+            ["mega-sync-issues", f"--col-separator={_column_sep}"],
+            **_sp_common,
         )
-        columns, rows = _parse_table(stdout=result.stdout, split_string="###")
+        columns, rows = _parse_table(stdout=result.stdout)
         return columns, rows
     except CalledProcessError:
         return [], []
@@ -198,21 +199,35 @@ def list_sync_issues():
 def list_sync_issue_details(issue_id):
     try:
         result = subprocess.run(
-            ["mega-sync-issues", "--col-separator=###", "--detail", issue_id],
-            **sp_common,
+            [
+                "mega-sync-issues",
+                f"--col-separator={_column_sep}",
+                "--detail",
+                issue_id,
+            ],
+            **_sp_common,
         )
 
         # Determine issue to deal with
         description, raw_table = result.stdout.split("\n\n", 1)
-        columns, rows = _parse_table(stdout=raw_table, split_string="###")
+        columns, rows = _parse_table(stdout=raw_table)
         return description, columns, rows
     except CalledProcessError:
         return [], []
 
 
+@notify_wrapper
+def remove_sync_issue(path):
+    if path.startswith("<CLOUD>"):
+        remote_path = path[len("<CLOUD>") :]
+        return subprocess.run(["mega-rm", "-r", "-f", remote_path], **_sp_common)
+    else:
+        return subprocess.run(["rm", "-rf", path], **_sp_common)
+
+
 def list_webdavs(base_url=""):
     try:
-        result = subprocess.run(["mega-webdav"], **sp_common)
+        result = subprocess.run(["mega-webdav"], **_sp_common)
         headers = ["PATH", "URL"]
         columns = _create_table_header(headers)
 
@@ -239,20 +254,20 @@ def add_webdav(remote_path, is_public=False):
     cmd = ["mega-webdav", remote_path]
     if is_public:
         cmd.append("--public")
-    return subprocess.run(cmd, **sp_common)
+    return subprocess.run(cmd, **_sp_common)
 
 
 @notify_wrapper
 def remove_webdav(remote_path):
     return subprocess.run(
         ["mega-webdav", "-d", remote_path],
-        **sp_common,
+        **_sp_common,
     )
 
 
 def list_backups():
     try:
-        result = subprocess.run(["mega-backup"], **sp_common)
+        result = subprocess.run(["mega-backup"], **_sp_common)
         columns, rows = _parse_table_fixed(result.stdout)
         return columns, rows
 
@@ -269,18 +284,18 @@ def add_backup(local, remote, period, num):
         f"--period={period}",
         f"--num-backups={num}",
     ]
-    return subprocess.run(cmd, **sp_common)
+    return subprocess.run(cmd, **_sp_common)
 
 
 @notify_wrapper
 def remove_backup(local):
     cmd = ["mega-backup", "-d", local]
-    return subprocess.run(cmd, **sp_common)
+    return subprocess.run(cmd, **_sp_common)
 
 
 def list_mounts():
     try:
-        result = subprocess.run(["mega-fuse-show"], **sp_common)
+        result = subprocess.run(["mega-fuse-show"], **_sp_common)
         columns, rows = _parse_table_fixed(result.stdout)
         return columns, rows
 
@@ -308,7 +323,7 @@ def add_mount(
         cmd.append("--read-only")
 
     cmd += [local, remote]
-    return subprocess.run(cmd, **sp_common)
+    return subprocess.run(cmd, **_sp_common)
 
 
 @notify_wrapper
@@ -316,4 +331,4 @@ def remove_mount(local_or_name):
     # Function still in experimental stage, umount must be forced
     # with fusermount before removing with megacmd (disabling does not work properly)
     cmd = f"fusermount -uz {local_or_name} && mega-fuse-remove {local_or_name}"
-    return subprocess.run(cmd, shell=True, **sp_common)
+    return subprocess.run(cmd, shell=True, **_sp_common)
