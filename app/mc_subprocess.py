@@ -254,11 +254,10 @@ def list_backups():
     try:
         result = subprocess.run(["mega-backup"], **sp_common)
         columns, rows = _parse_table_fixed(result.stdout)
-        local_paths = [row["LOCALPATH"] for row in rows]
-        return columns, rows, local_paths
+        return columns, rows
 
     except CalledProcessError:
-        return [], [], []
+        return [], []
 
 
 @notify_wrapper
@@ -283,11 +282,10 @@ def list_mounts():
     try:
         result = subprocess.run(["mega-fuse-show"], **sp_common)
         columns, rows = _parse_table_fixed(result.stdout)
-        local_paths = [row["LOCAL_PATH"] for row in rows]
-        return columns, rows, local_paths
+        return columns, rows
 
     except CalledProcessError:
-        return [], [], []
+        return [], []
 
 
 @notify_wrapper

@@ -1,6 +1,6 @@
 from nicegui import app, ui
 from mc_directories import DirectorySelector
-from mc_layout import create_action_table
+from mc_layout import create_action_table, create_ok_cancel_row, create_add_refresh_row
 from mc_subprocess import list_webdavs, add_webdav, remove_webdav
 
 
@@ -12,15 +12,12 @@ def create_webdav_table():
             ui.label("Unserve WebDAV Path").classes("text-lg font-bold")
             ui.label(f"Path: {row["PATH"]}")
 
-            with ui.row():
-                ui.button("Cancel", on_click=dialog.close)
+            def on_delete():
+                remove_webdav(row["PATH"])
+                dialog.close()
+                create_webdav_table.refresh()
 
-                def on_unserve():
-                    remove_webdav(row["PATH"])
-                    dialog.close()
-                    create_webdav_table.refresh()
-
-                ui.button("OK", color="red", on_click=on_unserve)
+            create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_delete)
         dialog.open()
 
     # Show WebDAV table
@@ -28,7 +25,7 @@ def create_webdav_table():
     columns, rows = list_webdavs(base_url)
     with ui.row().classes("w-full overflow-auto"):
         table = create_action_table(
-            columns=columns, rows=rows, callback=show_delete_dialog, icon="delete"
+            columns=columns, rows=rows, action_cb=show_delete_dialog, icon="delete"
         ).classes("w-full")
         table.add_slot(
             "body-cell-URL",
@@ -44,31 +41,27 @@ def create_webdav_table():
     )
 
     # Add dialog
-    with ui.dialog() as serve_dialog, ui.card():
-        ui.label("Serve WebDAV Path").classes("text-lg font-bold")
-        remote_path_input = DirectorySelector("REMOTEPATH", "/", is_remote=True)
-        ui.checkbox(text="Start with public option").bind_value(
-            app.storage.general, "webdav_is_public"
-        )
+    def show_add_dialog():
+        with ui.dialog() as dialog, ui.card():
+            ui.label("Serve WebDAV Path").classes("text-lg font-bold")
+            remote_path_input = DirectorySelector("REMOTEPATH", "/", is_remote=True)
+            ui.checkbox(text="Start with public option").bind_value(
+                app.storage.general, "webdav_is_public"
+            )
 
-        with ui.row():
-            ui.button("Cancel", on_click=serve_dialog.close)
-
-            def on_serve():
+            def on_add():
                 remote_path = remote_path_input.get_selected_path()
                 is_public = app.storage.general.get("webdav_is_public", False)
                 add_webdav(remote_path, is_public)
-                serve_dialog.close()
+                dialog.close()
                 create_webdav_table.refresh()
 
-            ui.button("OK", on_click=on_serve)
+            create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_add)
+        dialog.open()
 
-    def open_serve_dialog():
-        serve_dialog.open()
-
-    with ui.row():
-        ui.button(icon="add", on_click=serve_dialog.open).classes("mt-6")
-        ui.button(icon="refresh", on_click=create_webdav_table.refresh).classes("mt-6")
+    create_add_refresh_row(
+        add_cb=show_add_dialog, refresh_cb=create_webdav_table.refresh
+    )
 
 
 def webdav_page():

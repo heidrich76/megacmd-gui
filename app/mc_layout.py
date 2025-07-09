@@ -28,7 +28,7 @@ def create_tab(name, label, icon):
     ui.tab(name=name, label=label, icon=icon).props("no-caps")
 
 
-def create_action_table(columns, rows, callback, icon="info"):
+def create_action_table(columns, rows, action_cb, icon="info"):
     columns.append(
         {"name": "action", "label": "ACTION", "field": "action", "sortable": False}
     )
@@ -41,5 +41,19 @@ def create_action_table(columns, rows, callback, icon="info"):
             </q-td>
         """,
     )
-    table.on("action", lambda msg: callback(msg.args["row"]))
+    table.on("action", lambda msg: action_cb(msg.args["row"]))
     return table
+
+
+def create_ok_cancel_row(cancel_cb, ok_cb):
+    with ui.row() as row:
+        ui.button("Cancel", on_click=cancel_cb)
+        ui.button("OK", color="red", on_click=ok_cb)
+    return row
+
+
+def create_add_refresh_row(add_cb, refresh_cb):
+    with ui.row() as row:
+        ui.button(icon="add", on_click=add_cb).classes("mt-6")
+        ui.button(icon="refresh", on_click=refresh_cb).classes("mt-6")
+    return row

@@ -1,6 +1,6 @@
 from nicegui import ui
 from mc_directories import DirectorySelector
-from mc_layout import create_action_table
+from mc_layout import create_action_table, create_ok_cancel_row, create_add_refresh_row
 from mc_subprocess import (
     list_syncs,
     add_sync,
@@ -24,40 +24,36 @@ def create_sync_table():
                 dialog.close()
                 create_sync_table.refresh()
 
-            with ui.row():
-                ui.button("Cancel", on_click=dialog.close)
-                ui.button("OK", color="red", on_click=on_delete)
+            create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_delete)
         dialog.open()
 
     # Show synchronization table
     columns, rows = list_syncs()
     with ui.row().classes("w-full overflow-auto"):
         create_action_table(
-            columns=columns, rows=rows, callback=show_delete_dialog, icon="delete"
+            columns=columns, rows=rows, action_cb=show_delete_dialog, icon="delete"
         ).classes("w-full")
 
     # Add dialog
-    with ui.dialog() as add_dialog, ui.card():
-        ui.label("Add Synchronization Pair").classes("text-lg font-bold")
-        with ui.row().classes("w-full"):
-            local_path_input = DirectorySelector("LOCALPATH", "/")
-            remote_path_input = DirectorySelector("REMOTEPATH", "/", is_remote=True)
+    def show_add_dialog():
+        with ui.dialog() as dialog, ui.card():
+            ui.label("Add Synchronization Pair").classes("text-lg font-bold")
+            with ui.row().classes("w-full"):
+                local_path_input = DirectorySelector("LOCALPATH", "/")
+                remote_path_input = DirectorySelector("REMOTEPATH", "/", is_remote=True)
 
-        def on_add():
-            add_sync(
-                local_path_input.get_selected_path(),
-                remote_path_input.get_selected_path(),
-            )
-            add_dialog.close()
-            create_sync_table.refresh()
+            def on_add():
+                add_sync(
+                    local_path_input.get_selected_path(),
+                    remote_path_input.get_selected_path(),
+                )
+                dialog.close()
+                create_sync_table.refresh()
 
-        with ui.row():
-            ui.button("Cancel", on_click=add_dialog.close)
-            ui.button("OK", on_click=on_add)
+            create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_add)
+        dialog.open()
 
-    with ui.row():
-        ui.button(icon="add", on_click=add_dialog.open).classes("mt-6")
-        ui.button(icon="refresh", on_click=create_sync_table.refresh).classes("mt-6")
+    create_add_refresh_row(add_cb=show_add_dialog, refresh_cb=create_sync_table.refresh)
 
     # Show issues table with details button
     ui.label("Issues").classes("text-h6")
@@ -77,7 +73,7 @@ def create_sync_table():
     with ui.row().classes("w-full overflow-auto"):
         columns, rows = list_sync_issues()
         create_action_table(
-            columns=columns, rows=rows, callback=show_issue_dialog
+            columns=columns, rows=rows, action_cb=show_issue_dialog
         ).classes("w-full")
 
 

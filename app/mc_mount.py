@@ -1,62 +1,68 @@
 from nicegui import ui
-from mc_layout import create_warning_label
+from mc_layout import (
+    create_warning_label,
+    create_action_table,
+    create_ok_cancel_row,
+    create_add_refresh_row,
+)
 from mc_directories import DirectorySelector
 from mc_subprocess import list_mounts, add_mount, remove_mount
 
 
 @ui.refreshable
 def create_mount_table():
-    columns, rows, local_paths = list_mounts()
+    # Delete dialog
+    def show_delete_dialog(row):
+        with ui.dialog() as dialog, ui.card():
+            ui.label("Delete Mount").classes("text-lg font-bold")
+            ui.label(f"Path: {row["LOCAL_PATH"]}")
+
+            def on_delete():
+                remove_mount(row["LOCAL_PATH"])
+                dialog.close()
+                create_mount_table.refresh()
+
+            create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_delete)
+        dialog.open()
+
+    # Show mount table
+    columns, rows = list_mounts()
     with ui.row().classes("w-full overflow-auto"):
-        ui.table(columns=columns, rows=rows).classes("w-full")
+        create_action_table(
+            columns=columns, rows=rows, action_cb=show_delete_dialog, icon="delete"
+        ).classes("w-full")
 
     # Add dialog
-    with ui.dialog() as add_dialog, ui.card():
-        ui.label("Add Mount").classes("text-lg font-bold")
-        with ui.row().classes("w-full"):
-            local_input = DirectorySelector("LOCAL", "/")
-            remote_input = DirectorySelector("REMOTE", "/", is_remote=True)
-        with ui.row():
-            name_input = ui.input("Name")
-            disabled = ui.checkbox("Disabled", value=False)
-            transient = ui.checkbox("Transient", value=False)
-            read_only = ui.checkbox("Read-only", value=False)
+    def show_add_dialog():
+        with ui.dialog() as dialog, ui.card():
+            ui.label("Add Mount").classes("text-lg font-bold")
+            with ui.row().classes("w-full"):
+                local_input = DirectorySelector("LOCAL", "/")
+                remote_input = DirectorySelector("REMOTE", "/", is_remote=True)
+            with ui.row():
+                name_input = ui.input("Name")
+                disabled = ui.checkbox("Disabled", value=False)
+                transient = ui.checkbox("Transient", value=False)
+                read_only = ui.checkbox("Read-only", value=False)
 
-        def on_add():
-            add_mount(
-                local_input.get_selected_path(),
-                remote_input.get_selected_path(),
-                name=name_input.value,
-                disabled=disabled.value,
-                transient=transient.value,
-                read_only=read_only.value,
-            )
-            add_dialog.close()
-            create_mount_table.refresh()
+            def on_add():
+                add_mount(
+                    local_input.get_selected_path(),
+                    remote_input.get_selected_path(),
+                    name=name_input.value,
+                    disabled=disabled.value,
+                    transient=transient.value,
+                    read_only=read_only.value,
+                )
+                dialog.close()
+                create_mount_table.refresh()
 
-        with ui.row():
-            ui.button("Cancel", on_click=add_dialog.close)
-            ui.button("OK", on_click=on_add)
+            create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_add)
+        dialog.open()
 
-    # Delete dialog
-    with ui.dialog() as remove_dialog, ui.card():
-        ui.label("Delete Mount").classes("text-lg font-bold")
-        select = ui.select(local_paths, label="Select").classes("w-full")
-
-        def on_remove():
-            remove_mount(select.value)
-            remove_dialog.close()
-            create_mount_table.refresh()
-
-        with ui.row():
-            ui.button("Cancel", on_click=remove_dialog.close)
-            ui.button("OK", color="red", on_click=on_remove)
-
-    # Action-Buttons
-    with ui.row():
-        ui.button(icon="add", on_click=add_dialog.open).classes("mt-6")
-        ui.button(icon="delete", on_click=remove_dialog.open).classes("mt-6")
-        ui.button(icon="refresh", on_click=create_mount_table.refresh).classes("mt-6")
+    create_add_refresh_row(
+        add_cb=show_add_dialog, refresh_cb=create_mount_table.refresh
+    )
 
 
 def mount_page():
