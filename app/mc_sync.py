@@ -1,4 +1,5 @@
 from nicegui import ui
+import time
 from mc_directories import DirectorySelector
 from mc_layout import create_action_table, create_ok_cancel_row, create_add_refresh_row
 from mc_subprocess import (
@@ -66,7 +67,29 @@ def create_sync_table():
             ui.label("Issue").classes("text-lg font-bold")
             description, columns, rows = list_sync_issue_details(row["ISSUE_ID"])
             ui.label(description).style("white-space: pre-wrap")
-            ui.table(columns=columns, rows=rows).classes("w-full")
+
+            # Delete issue dialog
+            def show_delete_issue_dialog(row):
+                with ui.dialog() as dialog, ui.card():
+                    ui.label("Delete Issue Path").classes("text-lg font-bold")
+                    ui.label(f"Path: {row["PATH"]}")
+
+                    def on_delete():
+                        remove_sync_issue(row["PATH"])
+                        dialog.close()
+                        # Wait for megacmd to analyze new situation
+                        time.sleep(1)
+                        create_sync_table.refresh()
+
+                    create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_delete)
+                dialog.open()
+
+            create_action_table(
+                columns=columns,
+                rows=rows,
+                action_cb=show_delete_issue_dialog,
+                icon="delete",
+            ).classes("w-full")
 
             ui.button("Close", on_click=dialog.close)
         dialog.open()
