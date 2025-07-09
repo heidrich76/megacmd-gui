@@ -59,9 +59,7 @@ def create_webdav_table():
             create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_add)
         dialog.open()
 
-    create_add_refresh_row(
-        add_cb=show_add_dialog, refresh_cb=create_webdav_table.refresh
-    )
+    create_add_refresh_row(add_cb=show_add_dialog, refreshable=create_webdav_table)
 
 
 def webdav_page():

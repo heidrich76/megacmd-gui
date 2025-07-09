@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.10
+- Went back to NiceGUI `2.20.0` because of refresh bug
+
 ## 0.1.9
 
 - Bumped base image to `alpine:3.22`

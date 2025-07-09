@@ -52,8 +52,8 @@ def create_ok_cancel_row(cancel_cb, ok_cb):
     return row
 
 
-def create_add_refresh_row(add_cb, refresh_cb):
+def create_add_refresh_row(add_cb, refreshable):
     with ui.row() as row:
         ui.button(icon="add", on_click=add_cb).classes("mt-6")
-        ui.button(icon="refresh", on_click=refresh_cb).classes("mt-6")
+        ui.button(icon="refresh", on_click=refreshable.refresh).classes("mt-6")
     return row

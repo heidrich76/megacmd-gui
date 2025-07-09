@@ -55,7 +55,7 @@ def create_sync_table():
             create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_add)
         dialog.open()
 
-    create_add_refresh_row(add_cb=show_add_dialog, refresh_cb=create_sync_table.refresh)
+    create_add_refresh_row(add_cb=show_add_dialog, refreshable=create_sync_table)
 
     # Show issues table with details button
     ui.label("Issues").classes("text-h6")

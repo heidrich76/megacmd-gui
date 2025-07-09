@@ -2,7 +2,7 @@ FROM alpine:3.22 AS builder
 RUN apk add --no-cache py3-virtualenv
 RUN virtualenv venv
 ENV PATH="/venv/bin:$PATH"
-RUN pip install nicegui
+RUN pip install nicegui==2.20.0
 
 FROM alpine:3.22
 RUN apk add --no-cache bash wget uuidgen python3 git tmux
