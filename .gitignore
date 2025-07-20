@@ -25,7 +25,7 @@ var/
 
 # PyInstaller
 *.manifest
-*.spec
+#*.spec
 
 # Virtual environments
 venv/

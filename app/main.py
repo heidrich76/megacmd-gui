@@ -1,5 +1,7 @@
 import argparse
 import importlib
+import sys
+from pathlib import Path
 from nicegui import app, ui
 from mc_layout import add_tabs_style, create_tab
 from mc_login import create_login_dialog, check_login
@@ -62,7 +64,14 @@ def index_page():
             check_login(login_dialog)
 
 
-app.add_static_files("/static", "static")
+# Determine static path whether app is packaged or not
+if getattr(sys, "frozen", False):
+    base_dir = Path(sys._MEIPASS)
+else:
+    base_dir = Path(__file__).parent
+
+static_dir = base_dir / "static"
+app.add_static_files("/static", str(static_dir))
 importlib.import_module("mc_websocket")
 
 if __name__ in {"__main__", "__mp_main__"}:

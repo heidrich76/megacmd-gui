@@ -1,9 +1,15 @@
+import sys
 from nicegui import app, ui
 from pathlib import Path
 from mc_layout import create_warning_label
 
+# Determine static path whether app is packaged or not
+if getattr(sys, "frozen", False):
+    base_dir = Path(sys._MEIPASS)
+else:
+    base_dir = Path(__file__).parent
 
-js_path = Path(__file__).parent / "static" / "terminal.js"
+js_path = base_dir / "static" / "terminal.js"
 js_code = js_path.read_text(encoding="utf8")
 
 
