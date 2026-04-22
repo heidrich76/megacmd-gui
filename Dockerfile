@@ -1,15 +1,15 @@
-FROM alpine:3.22 AS builder
+FROM alpine:3.23 AS builder
 RUN apk add --no-cache py3-virtualenv
 RUN virtualenv venv
 ENV PATH="/venv/bin:$PATH"
-RUN pip install nicegui==2.20.0
+RUN pip install nicegui==3.10
 
-FROM alpine:3.22
+FROM alpine:3.23
 RUN apk add --no-cache bash wget uuidgen python3 git tmux
 COPY --from=builder /venv /venv
 ENV PATH="/venv/bin:$PATH"
 
-ENV VERSION=v2.1.1b4
+ENV VERSION=v2.5.2b2
 ENV BASE_URL=https://github.com/heidrich76/megacmd-alpine/releases/download/${VERSION}
 RUN wget "${BASE_URL}/megacmd_alpine_${VERSION}_$(uname -m).apk" -O /tmp/megacmd.apk && \
     apk add --no-cache --allow-untrusted /tmp/megacmd.apk && rm /tmp/megacmd.apk
