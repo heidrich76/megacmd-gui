@@ -1,7 +1,4 @@
 import argparse
-import importlib
-import sys
-from pathlib import Path
 from nicegui import app, ui
 from mc_layout import add_tabs_style, create_tab
 from mc_login import create_login_dialog, check_login
@@ -64,16 +61,6 @@ def index_page():
             check_login(login_dialog)
 
 
-# Determine static path whether app is packaged or not
-if getattr(sys, "frozen", False):
-    base_dir = Path(sys._MEIPASS)
-else:
-    base_dir = Path(__file__).parent
-
-static_dir = base_dir / "static"
-app.add_static_files("/static", str(static_dir))
-importlib.import_module("mc_websocket")
-
 if __name__ in {"__main__", "__mp_main__"}:
     parser = argparse.ArgumentParser(description="Start the MEGAcmd NiceGUI app.")
     parser.add_argument("--host", default="0.0.0.0", help="Host address to bind to")
@@ -93,10 +80,7 @@ if __name__ in {"__main__", "__mp_main__"}:
         choices=["critical", "error", "warning", "info", "debug", "trace"],
         help="Uvicorn logging level",
     )
-    parser.add_argument("--root_path", default="", help="Root path to use")
-
     args = parser.parse_args()
-    app.storage.general["root_path"] = args.root_path
 
     try:
         ui.run(
@@ -105,7 +89,6 @@ if __name__ in {"__main__", "__mp_main__"}:
             reload=args.reload,
             show=args.show,
             uvicorn_logging_level=args.log_level,
-            root_path=args.root_path,
         )
     except KeyboardInterrupt:
         print("NiceGUI server stopped via keyboard interrupt")

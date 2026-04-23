@@ -5,7 +5,7 @@ ENV PATH="/venv/bin:$PATH"
 RUN pip install nicegui==3.10
 
 FROM alpine:3.23
-RUN apk add --no-cache bash wget uuidgen python3 git tmux
+RUN apk add --no-cache bash wget uuidgen python3
 COPY --from=builder /venv /venv
 ENV PATH="/venv/bin:$PATH"
 

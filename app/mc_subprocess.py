@@ -1,10 +1,44 @@
 from nicegui import ui
 import asyncio
 import os
+import pty
 import re
 import subprocess
 from subprocess import CalledProcessError
 from urllib.parse import urlparse
+
+
+def run_with_pty(cmd: list[str]) -> tuple[int, str]:
+    master_fd, slave_fd = pty.openpty()
+    try:
+        process = subprocess.Popen(
+            cmd,
+            stdin=slave_fd,
+            stdout=slave_fd,
+            stderr=slave_fd,
+            text=False,
+            close_fds=True,
+        )
+        os.close(slave_fd)
+
+        output = b""
+        while True:
+            try:
+                chunk = os.read(master_fd, 4096)
+                if not chunk:
+                    break
+                output += chunk
+            except OSError:
+                break
+
+        returncode = process.wait()
+        return returncode, output.decode(errors="replace")
+    finally:
+        try:
+            os.close(master_fd)
+        except OSError:
+            pass
+
 
 _sp_common = {"capture_output": True, "text": True, "check": True}
 _column_sep = "###"
@@ -173,10 +207,14 @@ def list_syncs():
 
 @notify_wrapper
 def add_sync(local_path, remote_path):
-    return subprocess.run(
-        ["mega-sync", local_path, remote_path],
-        **_sp_common,
-    )
+    rc, out = run_with_pty(["mega-sync", local_path, remote_path])
+    print(rc)
+    print(out)
+    return out
+    # return subprocess.run(
+    #     ["mega-sync", local_path, remote_path],
+    #     **_sp_common,
+    # )
 
 
 @notify_wrapper

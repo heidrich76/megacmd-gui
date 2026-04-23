@@ -1,41 +1,108 @@
-import sys
-from nicegui import app, ui
-from pathlib import Path
+# Code adapted based on NiceGUI example: https://github.com/zauberzeug/nicegui/blob/main/examples/xterm/main.py
+import asyncio
+import fcntl
+import os
+import pty
+import signal
+import struct
+import termios
+
+from nicegui import core, events, ui
+
 from mc_layout import create_warning_label
 
-# Determine static path whether app is packaged or not
-if getattr(sys, "frozen", False):
-    base_dir = Path(sys._MEIPASS)
-else:
-    base_dir = Path(__file__).parent
 
-js_path = base_dir / "static" / "terminal.js"
-js_code = js_path.read_text(encoding="utf8")
-
-
-def terminal_page():
+def terminal_page() -> None:
     ui.page_title("Terminal")
-
-    root_path = app.storage.general.get("root_path", "")
-    rp_js_code = js_code.replace("/terminal", f"{root_path}/terminal")
-    ui.add_css(
-        """
-        .xterm-viewport {
-        overflow: hidden !important;
-        }
-         """
-    )
-    ui.add_head_html(
-        f"""
-        <script src="{root_path}/static/xterm.js"></script>
-        <link rel="stylesheet" href="{root_path}/static/xterm.css" />
-        <script src="{root_path}/static/addon-fit.js"></script>
-        <script>{rp_js_code}</script>
-        """
-    )
     create_warning_label("Be careful, you have full access to the container")
 
+    client = ui.context.client
+    pty_state = {"pid": -1, "fd": -1}
+
     with ui.column().classes("w-full"):
-        ui.column().props("id=terminal").classes(
-            "w-full min-h-[400px] h-[calc(100dvh-200px)]"
-        )
+        terminal = ui.xterm().classes("w-full min-h-[400px] h-[calc(100dvh-200px)]")
+        ui.element("q-resize-observer").on("resize", terminal.fit)
+
+    @terminal.on_data
+    def terminal_to_pty(event: events.XtermDataEventArguments) -> None:
+        fd = pty_state["fd"]
+        if fd < 0:
+            return
+        try:
+            os.write(fd, event.data.encode("utf-8"))
+        except OSError:
+            pass
+
+    @terminal.on_resize
+    def resize_terminal(event: events.XtermResizeEventArguments) -> None:
+        fd = pty_state["fd"]
+        if fd < 0:
+            return
+        try:
+            fcntl.ioctl(
+                fd,
+                termios.TIOCSWINSZ,
+                struct.pack("HHHH", event.rows, event.cols, 0, 0),
+            )
+        except OSError:
+            pass
+
+    async def start_terminal() -> None:
+        await client.connected()
+
+        pid, fd = pty.fork()
+        if pid == 0:
+            os.environ["TERM"] = "xterm-256color"
+            os.environ["COLORTERM"] = "truecolor"
+            os.execvp("/bin/bash", ["/bin/bash"])
+
+        pty_state["pid"] = pid
+        pty_state["fd"] = fd
+
+        def pty_to_terminal() -> None:
+            try:
+                data = os.read(fd, 1024)
+            except OSError:
+                data = b""
+
+            if not data:
+                try:
+                    core.loop.remove_reader(fd)
+                except Exception:
+                    pass
+                return
+
+            if not terminal.is_deleted:
+                terminal.write(data.decode(errors="ignore"))
+
+        core.loop.add_reader(fd, pty_to_terminal)
+        terminal.fit()
+
+    async def cleanup() -> None:
+        fd = pty_state["fd"]
+        pid = pty_state["pid"]
+
+        if fd >= 0:
+            try:
+                core.loop.remove_reader(fd)
+            except Exception:
+                pass
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            pty_state["fd"] = -1
+
+        if pid > 0:
+            try:
+                os.kill(pid, signal.SIGHUP)
+            except OSError:
+                pass
+            try:
+                os.waitpid(pid, 0)
+            except (ChildProcessError, OSError):
+                pass
+            pty_state["pid"] = -1
+
+    asyncio.create_task(start_terminal())
+    client.on_disconnect(cleanup)
