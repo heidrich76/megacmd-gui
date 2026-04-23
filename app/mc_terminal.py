@@ -6,13 +6,11 @@ import pty
 import signal
 import struct
 import termios
-
 from nicegui import core, events, ui
-
 from mc_layout import create_warning_label
 
 
-def terminal_page() -> None:
+def terminal_page():
     ui.page_title("Terminal")
     create_warning_label("Be careful, you have full access to the container")
 
@@ -24,7 +22,7 @@ def terminal_page() -> None:
         ui.element("q-resize-observer").on("resize", terminal.fit)
 
     @terminal.on_data
-    def terminal_to_pty(event: events.XtermDataEventArguments) -> None:
+    def terminal_to_pty(event: events.XtermDataEventArguments):
         fd = pty_state["fd"]
         if fd < 0:
             return
@@ -34,7 +32,7 @@ def terminal_page() -> None:
             pass
 
     @terminal.on_resize
-    def resize_terminal(event: events.XtermResizeEventArguments) -> None:
+    def resize_terminal(event: events.XtermResizeEventArguments):
         fd = pty_state["fd"]
         if fd < 0:
             return
@@ -47,7 +45,7 @@ def terminal_page() -> None:
         except OSError:
             pass
 
-    async def start_terminal() -> None:
+    async def start_terminal():
         await client.connected()
 
         pid, fd = pty.fork()
@@ -59,7 +57,7 @@ def terminal_page() -> None:
         pty_state["pid"] = pid
         pty_state["fd"] = fd
 
-        def pty_to_terminal() -> None:
+        def pty_to_terminal():
             try:
                 data = os.read(fd, 1024)
             except OSError:
@@ -78,7 +76,7 @@ def terminal_page() -> None:
         core.loop.add_reader(fd, pty_to_terminal)
         terminal.fit()
 
-    async def cleanup() -> None:
+    async def cleanup():
         fd = pty_state["fd"]
         pid = pty_state["pid"]
 
