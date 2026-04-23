@@ -9,7 +9,7 @@ RUN apk add --no-cache bash wget uuidgen python3
 COPY --from=builder /venv /venv
 ENV PATH="/venv/bin:$PATH"
 
-ENV VERSION=v2.5.2b2
+ENV VERSION=v2.5.2b3
 ENV BASE_URL=https://github.com/heidrich76/megacmd-alpine/releases/download/${VERSION}
 RUN wget "${BASE_URL}/megacmd_alpine_${VERSION}_$(uname -m).apk" -O /tmp/megacmd.apk && \
     apk add --no-cache --allow-untrusted /tmp/megacmd.apk && rm /tmp/megacmd.apk

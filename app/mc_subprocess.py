@@ -9,8 +9,9 @@ from urllib.parse import urlparse
 
 _sp_common = {"capture_output": True, "text": True, "check": True}
 _column_sep = "###"
-_sleep_time = 0.5
-_login_sleep_time = 0.5
+_sleep_login_check = 0.5
+_sleep_before_cmd = 0.1
+_sleep_after_cmd = 1
 
 
 def _create_table_header(headers):
@@ -111,7 +112,7 @@ async def login(email, password):
             stderr=subprocess.DEVNULL,
         )
         while proc.poll() is None:
-            await asyncio.sleep(_login_sleep_time)
+            await asyncio.sleep(_sleep_login_check)
     except CalledProcessError:
         return ""
 
@@ -165,7 +166,7 @@ def mkdir(path, new_dir, is_remote=False):
 async def list_syncs():
     try:
         # Give MEGAcmd a moment to update sync state after changes
-        await asyncio.sleep(_sleep_time)
+        await asyncio.sleep(_sleep_before_cmd)
         result = subprocess.run(
             ["mega-sync", f"--col-separator={_column_sep}"],
             **_sp_common,
@@ -183,23 +184,21 @@ async def add_sync(local_path, remote_path):
         ["mega-sync", local_path, remote_path],
         **_sp_common,
     )
-    # Must add a wait since MEGAcmd 2.5.2 because of sync issues when status
-    # is called too early
-    await asyncio.sleep(_sleep_time)
+    await asyncio.sleep(_sleep_after_cmd)
     return result
 
 
 @notify_wrapper
 async def remove_sync(local_path):
     result = subprocess.run(["mega-sync", "-d", local_path], **_sp_common)
-    await asyncio.sleep(_sleep_time)
+    await asyncio.sleep(_sleep_after_cmd)
     return result
 
 
 async def list_sync_issues():
     try:
         # Give MEGAcmd a moment to update sync state after changes
-        await asyncio.sleep(_sleep_time)
+        await asyncio.sleep(_sleep_before_cmd)
         result = subprocess.run(
             ["mega-sync-issues", f"--col-separator={_column_sep}"],
             **_sp_common,
@@ -238,7 +237,7 @@ async def remove_sync_issue(path):
         result = subprocess.run(["mega-rm", "-r", "-f", remote_path], **_sp_common)
     else:
         result = subprocess.run(["rm", "-rf", path], **_sp_common)
-    await asyncio.sleep(_sleep_time)
+    await asyncio.sleep(_sleep_after_cmd)
     return result
 
 

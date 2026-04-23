@@ -65,7 +65,7 @@ Getting started with development is streamlined using VSCode Dev Containers. Fol
     ```bash
     mega-cmd-server --do-not-log-to-stdout &
     cd /workspace/app
-    python3 main.py
+    python3 main.py --reload True
     ```
 
 
