@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.2.0 (not yet released)
-- Updated megacmd to `v2.5.2b3`
+## 0.2.0
+- Updated megacmd to `v2.5.2b4`
 - Updated base image to `alpine:3.23`
-- Updated NiceGUI to 3.10
+- Updated NiceGUI to `3.10`
 - Replaced tmux with Python-based terminal session and new NiceGUI xterm UI
+- Added timeouts after synchronization commands
 
 ## 0.1.10
 - Went back to NiceGUI `2.20.0` because of refresh bug
