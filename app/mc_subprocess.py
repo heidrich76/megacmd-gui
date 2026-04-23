@@ -65,9 +65,23 @@ def notify_wrapper(func):
     def wrapped(*args, **kwargs):
         try:
             result = func(*args, **kwargs)
+            print(result)
             ui.notify("Done", color="positive")
             return result
         except CalledProcessError as e:
+            ui.notify(f"Error: {e.stderr}", color="negative")
+            return None
+
+    return wrapped
+
+
+def notify_wrapper_async(func):
+    async def wrapped(*args, **kwargs):
+        try:
+            result = await func(*args, **kwargs)
+            ui.notify("Done", color="positive")
+            return result
+        except Exception as e:
             ui.notify(f"Error: {e.stderr}", color="negative")
             return None
 
@@ -177,7 +191,7 @@ async def list_syncs():
         return [], []
 
 
-@notify_wrapper
+@notify_wrapper_async
 async def add_sync(local_path, remote_path):
     result = await asyncio.to_thread(
         subprocess.run,
@@ -188,7 +202,7 @@ async def add_sync(local_path, remote_path):
     return result
 
 
-@notify_wrapper
+@notify_wrapper_async
 async def remove_sync(local_path):
     result = subprocess.run(["mega-sync", "-d", local_path], **_sp_common)
     await asyncio.sleep(_sleep_after_cmd)
@@ -229,7 +243,7 @@ def list_sync_issue_details(issue_id):
         return [], []
 
 
-@notify_wrapper
+@notify_wrapper_async
 async def remove_sync_issue(path):
     result = None
     if path.startswith("<CLOUD>"):
