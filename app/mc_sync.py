@@ -1,5 +1,4 @@
 from nicegui import ui
-import time
 from mc_directories import DirectorySelector
 from mc_layout import create_action_table, create_ok_cancel_row, create_add_refresh_row
 from mc_subprocess import (
@@ -13,7 +12,7 @@ from mc_subprocess import (
 
 
 @ui.refreshable
-def create_sync_table():
+async def create_sync_table():
     # Delete dialog
     def show_delete_dialog(row):
         with ui.dialog() as dialog, ui.card():
@@ -21,8 +20,8 @@ def create_sync_table():
             ui.label(f"Local Path: {row["LOCALPATH"]}")
             ui.label(f"Remote Path: {row["REMOTEPATH"]}")
 
-            def on_delete():
-                remove_sync(row["LOCALPATH"])
+            async def on_delete():
+                await remove_sync(row["LOCALPATH"])
                 dialog.close()
                 create_sync_table.refresh()
 
@@ -30,7 +29,7 @@ def create_sync_table():
         dialog.open()
 
     # Show synchronization table
-    columns, rows = list_syncs()
+    columns, rows = await list_syncs()
     with ui.row().classes("w-full overflow-auto"):
         create_action_table(
             columns=columns, rows=rows, action_cb=show_delete_dialog, icon="delete"
@@ -44,8 +43,8 @@ def create_sync_table():
                 local_path_input = DirectorySelector("LOCALPATH", "/")
                 remote_path_input = DirectorySelector("REMOTEPATH", "/", is_remote=True)
 
-            def on_add():
-                add_sync(
+            async def on_add():
+                await add_sync(
                     local_path_input.get_selected_path(),
                     remote_path_input.get_selected_path(),
                 )
@@ -74,11 +73,9 @@ def create_sync_table():
                     ui.label("Delete Issue Path").classes("text-lg font-bold")
                     ui.label(f"Path: {row["PATH"]}")
 
-                    def on_delete():
-                        remove_sync_issue(row["PATH"])
+                    async def on_delete():
+                        await remove_sync_issue(row["PATH"])
                         dialog.close()
-                        # Wait for megacmd to analyze new situation
-                        time.sleep(1)
                         create_sync_table.refresh()
 
                     create_ok_cancel_row(cancel_cb=dialog.close, ok_cb=on_delete)
@@ -95,16 +92,16 @@ def create_sync_table():
         dialog.open()
 
     with ui.row().classes("w-full overflow-auto"):
-        columns, rows = list_sync_issues()
+        columns, rows = await list_sync_issues()
         create_action_table(
             columns=columns, rows=rows, action_cb=show_issue_dialog
         ).classes("w-full")
 
 
-def sync_page():
+async def sync_page():
     ui.page_title("Synchronization")
 
     with ui.column().classes("w-full"):
         ui.label("Synchronization").classes("text-h5")
         ui.label("List of local and cloud folders synchronized")
-        create_sync_table()
+        await create_sync_table()

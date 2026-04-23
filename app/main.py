@@ -12,7 +12,7 @@ from mc_settings import settings_page
 
 
 @ui.page("/")
-def index_page():
+async def index_page():
     dark = ui.dark_mode(app.storage.general.get("dark", None))
     dark.bind_value(app.storage.general, "dark")
 
@@ -43,7 +43,7 @@ def index_page():
             home_page()
             check_login(login_dialog)
         with ui.tab_panel("/sync"):
-            sync_page()
+            await sync_page()
             check_login(login_dialog)
         with ui.tab_panel("/webdav"):
             webdav_page()

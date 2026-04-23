@@ -1,47 +1,16 @@
 from nicegui import ui
 import asyncio
 import os
-import pty
 import re
 import subprocess
 from subprocess import CalledProcessError
 from urllib.parse import urlparse
 
 
-def run_with_pty(cmd: list[str]) -> tuple[int, str]:
-    master_fd, slave_fd = pty.openpty()
-    try:
-        process = subprocess.Popen(
-            cmd,
-            stdin=slave_fd,
-            stdout=slave_fd,
-            stderr=slave_fd,
-            text=False,
-            close_fds=True,
-        )
-        os.close(slave_fd)
-
-        output = b""
-        while True:
-            try:
-                chunk = os.read(master_fd, 4096)
-                if not chunk:
-                    break
-                output += chunk
-            except OSError:
-                break
-
-        returncode = process.wait()
-        return returncode, output.decode(errors="replace")
-    finally:
-        try:
-            os.close(master_fd)
-        except OSError:
-            pass
-
-
 _sp_common = {"capture_output": True, "text": True, "check": True}
 _column_sep = "###"
+_sleep_time = 0.5
+_login_sleep_time = 0.5
 
 
 def _create_table_header(headers):
@@ -142,7 +111,7 @@ async def login(email, password):
             stderr=subprocess.DEVNULL,
         )
         while proc.poll() is None:
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(_login_sleep_time)
     except CalledProcessError:
         return ""
 
@@ -193,8 +162,10 @@ def mkdir(path, new_dir, is_remote=False):
     return subprocess.run([cmd, full_path], **_sp_common)
 
 
-def list_syncs():
+async def list_syncs():
     try:
+        # Give MEGAcmd a moment to update sync state after changes
+        await asyncio.sleep(_sleep_time)
         result = subprocess.run(
             ["mega-sync", f"--col-separator={_column_sep}"],
             **_sp_common,
@@ -206,24 +177,29 @@ def list_syncs():
 
 
 @notify_wrapper
-def add_sync(local_path, remote_path):
-    rc, out = run_with_pty(["mega-sync", local_path, remote_path])
-    print(rc)
-    print(out)
-    return out
-    # return subprocess.run(
-    #     ["mega-sync", local_path, remote_path],
-    #     **_sp_common,
-    # )
+async def add_sync(local_path, remote_path):
+    result = await asyncio.to_thread(
+        subprocess.run,
+        ["mega-sync", local_path, remote_path],
+        **_sp_common,
+    )
+    # Must add a wait since MEGAcmd 2.5.2 because of sync issues when status
+    # is called too early
+    await asyncio.sleep(_sleep_time)
+    return result
 
 
 @notify_wrapper
-def remove_sync(local_path):
-    return subprocess.run(["mega-sync", "-d", local_path], **_sp_common)
+async def remove_sync(local_path):
+    result = subprocess.run(["mega-sync", "-d", local_path], **_sp_common)
+    await asyncio.sleep(_sleep_time)
+    return result
 
 
-def list_sync_issues():
+async def list_sync_issues():
     try:
+        # Give MEGAcmd a moment to update sync state after changes
+        await asyncio.sleep(_sleep_time)
         result = subprocess.run(
             ["mega-sync-issues", f"--col-separator={_column_sep}"],
             **_sp_common,
@@ -255,12 +231,15 @@ def list_sync_issue_details(issue_id):
 
 
 @notify_wrapper
-def remove_sync_issue(path):
+async def remove_sync_issue(path):
+    result = None
     if path.startswith("<CLOUD>"):
         remote_path = path[len("<CLOUD>") :]
-        return subprocess.run(["mega-rm", "-r", "-f", remote_path], **_sp_common)
+        result = subprocess.run(["mega-rm", "-r", "-f", remote_path], **_sp_common)
     else:
-        return subprocess.run(["rm", "-rf", path], **_sp_common)
+        result = subprocess.run(["rm", "-rf", path], **_sp_common)
+    await asyncio.sleep(_sleep_time)
+    return result
 
 
 def list_webdavs(base_url=""):
