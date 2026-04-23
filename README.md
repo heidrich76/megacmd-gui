@@ -39,7 +39,7 @@ To make the folder mounted within the container accessible outside on your host 
 
 For Windows users, this functionality is primarily confined to the Docker-Desktop WSL environment, but the files can still be conveniently accessed via the Windows Explorer under the `Linux` file section at `\\wsl.localhost\docker-desktop\mnt\mega`.
 
-* **Prepare Mounting Point (Windows-only):**
+- **Prepare Mounting Point (Windows-only):**
     For Windows users, it's necessary to prepare the mount point within the `docker-desktop` WSL2 environment.
     ```bash
     wsl -d docker-desktop # Switches to the Docker-Desktop WSL environment
@@ -47,7 +47,7 @@ For Windows users, this functionality is primarily confined to the Docker-Deskto
     exit                # Exits the WSL environment
     ```
 
-* **Start Container with Bind Propagation:**
+- **Start Container with Bind Propagation:**
     This command initiates the container with the necessary FUSE permissions and sets up the recursive bind propagation from the prepared host folder to a folder within the container.
     ```bash
     docker run -itd --name megacmd-gui -p 8080:8080 -v root-volume:/root --cap-add=SYS_ADMIN --device=/dev/fuse --security-opt apparmor:unconfined --mount type=bind,src=/mnt/mega,dst=/mnt/mega,bind-propagation=rshared jensheidrich76/megacmd-gui:latest
@@ -59,8 +59,14 @@ For Windows users, this functionality is primarily confined to the Docker-Deskto
 
 Getting started with development is streamlined using VSCode Dev Containers. Follow these steps:
 
-1.  **Clone the Repository and Open in VSCode:** Begin by cloning the project repository to your local machine. Once cloned, open the repository folder in VSCode. VSCode should automatically detect the dev container configuration.
-2.  **Build and Start the Dev Container:** When prompted by VSCode, select "Reopen in Container" (or a similar option) to build and start the development container. This will set up your isolated development environment with all necessary dependencies.
+1. **Clone the Repository and Open in VSCode:** Begin by cloning the project repository to your local machine. Once cloned, open the repository folder in VSCode. VSCode should automatically detect the dev container configuration.
+2. **Build and Start the Dev Container:** When prompted by VSCode, select "Reopen in Container" (or a similar option) to build and start the development container. This will set up your isolated development environment with all necessary dependencies.
+3. **Start MEGAcmd server and NiceGUI:**
+    ```bash
+    mega-cmd-server --do-not-log-to-stdout &
+    cd /workspace/app
+    python3 main.py
+    ```
 
 
 ## Building and Testing the Application
@@ -75,8 +81,8 @@ Getting started with development is streamlined using VSCode Dev Containers. Fol
   ```
 - Initiating a GitHub build by creating and pushing a tag to the repository:
   ```bash
-  git tag -a v0.1.10 -m "Release v0.1.10"
-  git push origin v0.1.10
+  git tag -a v0.2.0 -m "Release v0.2.0"
+  git push origin v0.2.0
   ```
 
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2 (not yet released)
+## 0.2.0 (not yet released)
 - Updated megacmd to `v2.5.2b3`
 - Updated base image to `alpine:3.23`
 - Updated NiceGUI to 3.10
