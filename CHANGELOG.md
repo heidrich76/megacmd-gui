@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1
+- Reintroduced `root_path` argument
+
 ## 0.2.0
 - Updated megacmd to `v2.5.2b4`
 - Updated base image to `alpine:3.23`

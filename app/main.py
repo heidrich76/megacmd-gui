@@ -80,6 +80,7 @@ if __name__ in {"__main__", "__mp_main__"}:
         choices=["critical", "error", "warning", "info", "debug", "trace"],
         help="Uvicorn logging level",
     )
+    parser.add_argument("--root_path", default="", help="Root path to use")
     args = parser.parse_args()
 
     try:
@@ -89,6 +90,7 @@ if __name__ in {"__main__", "__mp_main__"}:
             reload=args.reload,
             show=args.show,
             uvicorn_logging_level=args.log_level,
+            root_path=args.root_path,
         )
     except KeyboardInterrupt:
         print("NiceGUI server stopped via keyboard interrupt")
