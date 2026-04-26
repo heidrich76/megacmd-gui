@@ -6,7 +6,9 @@ This project provides a simple web-based user interface for a recent build of [M
 
 > ⚠️ **Work in progress**: This add-on is provided _as-is_. Use at your own risk.
 
-### Critical Warning (MEGAcmd sync issue)
+![MEGAcmd Syncs](megacmd-gui.png)
+
+### Warning
 Certain versions of MEGAcmd (tested from 2.1.1 to 2.5.2) contain a bug that can **unexpectedly move your cloud files to the Rubbish bin**. This may occur if `mega-sync` is executed immediately after adding a new sync pair while its state is still *Pending*.
 Recommendation: Avoid calling `mega-sync` immediately after creating a sync and wait a couple of seconds.
 Therefore, this web-based user interface adds some delay before calling `mega-sync` for displaying all sync pairs.
